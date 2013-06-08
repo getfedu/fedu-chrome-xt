@@ -1,0 +1,10 @@
+{
+  "appName": {
+    "message": "fedu-chrome-xt",
+    "description": "The name of the application"
+  },
+  "appDescription": {
+    "message": "Add Posts to fedu when not on the website...",
+    "description": "The description of the application"
+  }
+}

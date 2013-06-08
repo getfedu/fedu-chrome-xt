@@ -1,0 +1,33 @@
+/* Will be compiled down to a single stylesheet with your sass files */
+
+html {
+    /* Defaults css for cssmin process */
+}
+
+body {
+    min-width: 580px;
+}
+
+#msg {
+    padding: 20px;
+}
+
+#add_post {
+    display: none;
+}
+
+#overlay {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: rgba(0,0,0, 0.2);
+}
+
+#overlay .inner {
+    position: absolute;
+    top: 50%;
+    left: 45%;
+    text-align: center;
+}

@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+    <head>
+        <link href="styles/bootstrap.css" rel="stylesheet">
+        <link href="styles/main.css" rel="stylesheet">
+        <!-- build:js scripts/popup.js -->
+        <script src="bower_components/jquery/jquery.js"></script>
+        <script src="bower_components/moment/moment.js"></script>
+        <script src="scripts/popup.js"></script>
+        <!-- endbuild -->
+    </head>
+    <body>
+        <!-- CHROME EXTENSION POPUP -->
+        <div id="msg"></div>
+        <form action="#" id="add_post" method="POST" class="span7">
+            <fieldset class="row-fluid">
+                <legend>Add a Post</legend>
+
+                <div class="controls controls-row">
+                    <label>Video Id</label>
+                    <input type="text" name="videoId" class="video_id span6" placeholder="enter video id" autofocus="" required="">
+
+                    <input type="hidden" name="videoType">
+                </div>
+
+                <label>Title</label>
+                <input type="text" name="title" class="span12" placeholder="enter the Title" required="">
+
+                <label>Description</label>
+                <textarea rows="5" class="span12" name="description" required=""></textarea>
+
+                <!-- <label>Tags</label>
+                <div class="tags uneditable-input">
+                    <input type="text" class="typeahead" placeholder="enter some tags" data-provide="typeahead" autocomplete="off">
+                    <input type="hidden" name="tags">
+                </div> -->
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="button" id="cancel" class="btn cancel_post">Cancel</button>
+                </div>
+
+            </fieldset>
+        </form>
+        <div id="overlay">
+            <div class="inner">
+                <img src="images/ajax-loader.gif" alt="loading icon">
+            </div>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,10 @@
+{
+  "name": "fedu-chrome-xt",
+  "version": "0.0.1",
+  "dependencies": {
+    "jquery": "~2.0.2",
+    "moment": "~2.0.0",
+    "bootstrap": "v2.3.2"
+  },
+  "devDependencies": {}
+}
