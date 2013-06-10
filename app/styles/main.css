@@ -31,3 +31,35 @@ body {
     left: 45%;
     text-align: center;
 }
+
+.tags {
+    cursor: auto;
+    width: 100%;
+    margin-left: 0;
+    height: 30px;
+    padding: 3px 4px;
+    overflow: visible;
+}
+.tags .tag {
+    display: inline-block;
+    border-radius: 3px;
+    margin: 0 5px 0 0;
+    padding: 0 7px 0 7px;
+}
+
+.tags .tag:after {
+    content: "x";
+    font-weight: bold;
+    padding: 0 0 0 5px;
+}
+
+.tags input {
+    padding: 0;
+    margin: 0;
+    border: none;
+    box-shadow: none;
+}
+
+.tags input:focus {
+   box-shadow: none;
+}

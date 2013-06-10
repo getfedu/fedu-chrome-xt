@@ -1,5 +1,5 @@
 'use strict';
-/* global jQuery, moment */
+/* global jQuery, moment, _ */
 
 jQuery(document).ready(function($) {
 
@@ -8,13 +8,28 @@ jQuery(document).ready(function($) {
         apiData: {},
         videoId: '',
         videoType: '',
+        engine: {
+            //Workaround for using underscore templating engine at typeahead
+            compile: function(template) {
+                var compiled = _.template(template);
+                return {
+                    render: function(context) {
+                        return compiled(context);
+                    }
+                };
+            }
+        },
+
+        init: function(){
+            this.eventListener();
+        },
 
         queryApi: function(id, type){
             var that = this;
             $.ajax({
                 type: 'POST',
                 url: 'http://localhost:3100/api-call',
-                data: { id: id, type: type, key: 'AIzaSyB4b8cdEoaJ_rlaKcBU5A3bg012b4id1xU' }
+                data: { id: id, type: type, key: 'AIzaSyB4b8cdEoaJ_rlaKcBU5A3bg012b4id1xU' },
             }).done(function(apiData){
                 that.renderForm(apiData, id, type);
                 that.apiData = apiData;
@@ -37,13 +52,20 @@ jQuery(document).ready(function($) {
         },
 
         addVideo: function(formData){
+            var tagsList = formData[4];
+            var tags = [''];
+            if(tagsList.value !== ''){
+                tags = tagsList.value.split(',');
+                tags.pop();
+            }
+
             var data = {
                 videoId: formData[0].value,
                 videoType: formData[1].value,
                 title: formData[2].value,
                 description: formData[3].value,
                 foreign: this.apiData.foreign,
-                tags: [''],
+                tags: tags,
                 additionalInfo: [''],
                 updateDate: moment().format(),
                 publishDate: moment().format()
@@ -52,7 +74,7 @@ jQuery(document).ready(function($) {
             $.ajax({
                 type: 'POST',
                 url: 'http://localhost:3100/post',
-                data: data
+                data: data,
             }).done(function(msg){
                 $('#msg').html(msg);
             }).fail(function(jqXHR, textStatus){
@@ -103,11 +125,104 @@ jQuery(document).ready(function($) {
             $('#cancel').on('click', function(){
                 window.close();
             });
-        }
+
+            $('input.typeahead').on('keydown', function(e){
+                that.autoCompleteKeyHandler(e);
+            });
+
+            $('input.typeahead').on('focus', function(e){
+                if(!$(e.currentTarget).hasClass('tt-query')){
+                    that.initAutoComplete();
+                }
+            });
+
+            $('body').on('click', '.tag', function(e){
+                console.log(e);
+                that.removeTag($(e.currentTarget));
+            });
+
+            $('body').on('typeahead:autocompleted', function(e){
+                that.addTag(e.target, e.target.value);
+            });
+
+            $('body').on('typeahead:selected', function(e){
+                that.addTag(e.target, e.target.value);
+            });
+        },
+
+        // Autocomplete Tags
+        initAutoComplete: function(){
+            var that = this;
+            $('.typeahead').typeahead({
+                name: 'autocomplete-tags',
+                valueKey: 'tagName',
+                prefetch: {
+                    url: 'http://localhost:3100/tag',
+                    ttl: 0
+                },
+                template: [
+                    '<p class="repo-name"><%= tagName %></p>',
+                    '<p class="repo-description"><%= description %></p>',
+                ].join(''),
+                engine: that.engine
+            });
+            $('.typeahead').focus();
+        },
+
+        autoCompleteKeyHandler: function(e){
+            if(e.keyCode === 188 && e.currentTarget.value !== ''){
+                e.preventDefault();
+                this.addTag(e.currentTarget, e.currentTarget.value);
+            } else if(e.keyCode === 8 && e.currentTarget.value === '') {
+                e.preventDefault();
+                this.removeTag($(e.currentTarget).parents('.tags').children('.tag').last(), 'backspace');
+            }
+        },
+
+        addTag: function(target, value){
+            var countTags = $(target).parents('.uneditable-input');
+            countTags = $(countTags).find('.btn').length+1;
+            if(countTags !== 6){
+                var val = $(target).parent().siblings('[type=hidden]').val();
+                $(target).parent().siblings('[type=hidden]').val(value.trim().toLowerCase() + ',' + val).addClass('changed');
+                $(target).val('').parent().before('<div class="btn tag">' + value.toLowerCase() + '</div>');
+                $(target).typeahead('destroy');
+                $('.typeahead').focus();
+            }
+
+            if(countTags === 5){
+                $(target).attr('placeholder', 'only 5 tags allowed');
+                $(target).attr('disabled', 'disabled');
+            }
+
+        },
+
+        removeTag: function(target, type){
+            var countTags = $(target).parent('.uneditable-input');
+            countTags = $(countTags).find('.btn').length;
+            var value = target.text();
+            var valueList = target.siblings('[type=hidden]').val();
+            if(valueList){
+                valueList = valueList.replace(value + ',', '');
+            }
+            target.siblings('[type=hidden]').val(valueList).addClass('changed');
+            if(type){
+                $('.typeahead').val(value);
+            }
+
+            if(countTags === 5){
+                var inputField = $(target).siblings('.twitter-typeahead').find('.tt-query');
+                inputField.attr('placeholder', 'enter some tags');
+                inputField.removeAttr('disabled');
+            }
+
+            target.remove();
+
+        },
     };
 
     chrome.tabs.getSelected(null, function(tab) {
-        popup.eventListener();
+        popup.init();
         popup.getIds(tab.url);
     });
 });
