@@ -29,7 +29,7 @@ jQuery(document).ready(function($) {
             $.ajax({
                 type: 'POST',
                 url: 'http://localhost:3100/api-call',
-                data: { id: id, type: type, key: 'AIzaSyB4b8cdEoaJ_rlaKcBU5A3bg012b4id1xU' },
+                data: { id: id, type: type },
             }).done(function(apiData){
                 that.renderForm(apiData, id, type);
                 that.apiData = apiData;
@@ -94,14 +94,16 @@ jQuery(document).ready(function($) {
             var vimeoRegex = /https?:\/\/(?:www\.)?vimeo.com\/(?:channels\/|groups\/([^\/]*)\/videos\/|album\/(\d+)\/video\/|)(\d+)(?:$|\/|\?)/;
 
             if(youtubeRegex.test(url)){
-                $('#add_post').fadeIn();
-                theId = url.replace(youtubeRegex, '$1');
+                url.replace(youtubeRegex, '$1');
+                var exec = youtubeRegex.exec(url); //second time matching, to ensure urls like: https://www.youtube.com/watch?v=kiUnJ1d8vvw&feature=youtu.be work
+                theId = exec[1];
                 type = 'youtube';
+                this.checkVideoId(theId, type);
             } else if(vimeoRegex.test(url)){
-                $('#add_post').fadeIn();
                 var match = url.match(vimeoRegex);
                 theId = match[3];
                 type = 'vimeo';
+                this.checkVideoId(theId, type);
             } else {
                 theId = false;
                 $('#overlay').remove();
@@ -110,8 +112,25 @@ jQuery(document).ready(function($) {
 
             this.videoId = theId;
             this.videoType = type;
+        },
 
-            this.queryApi(theId, type);
+        checkVideoId: function(id, type){
+            var that = this;
+            console.log(id, type);
+            $.ajax({
+                type: 'GET',
+                url: 'http://localhost:3100/post-exists/' + id,
+            }).done(function(res){
+                if(res){
+                    $('#overlay').hide();
+                    $('#msg').html('Sorry, this video is already in our database...');
+                } else {
+                    $('#add_post').fadeIn();
+                    that.queryApi(id, type);
+                }
+            }).fail(function(error){
+                console.log(error);
+            });
         },
 
         eventListener: function(){
@@ -194,7 +213,6 @@ jQuery(document).ready(function($) {
                 $(target).attr('placeholder', 'only 5 tags allowed');
                 $(target).attr('disabled', 'disabled');
             }
-
         },
 
         removeTag: function(target, type){
@@ -215,9 +233,7 @@ jQuery(document).ready(function($) {
                 inputField.attr('placeholder', 'enter some tags');
                 inputField.removeAttr('disabled');
             }
-
             target.remove();
-
         },
     };
 
