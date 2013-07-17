@@ -28,7 +28,7 @@ jQuery(document).ready(function($) {
             var that = this;
             $.ajax({
                 type: 'POST',
-                url: 'http://localhost:3100/api-call',
+                url: 'https://getfedu.com/api/api-call',
                 data: { id: id, type: type },
             }).done(function(apiData){
                 that.renderForm(apiData, id, type);
@@ -73,10 +73,15 @@ jQuery(document).ready(function($) {
 
             $.ajax({
                 type: 'POST',
-                url: 'http://localhost:3100/post',
+                url: 'https://getfedu.com/api/post',
                 data: data,
             }).done(function(msg){
-                $('#msg').html(msg);
+                console.log(msg);
+                $('#msg').html('Video added to fedu');
+                $('#add_post').fadeOut();
+                setTimeout(function() {
+                    window.close();
+                }, 3000);
             }).fail(function(jqXHR, textStatus){
                 $('#msg').html(textStatus);
                 console.log(jqXHR, textStatus);
@@ -119,7 +124,7 @@ jQuery(document).ready(function($) {
             console.log(id, type);
             $.ajax({
                 type: 'GET',
-                url: 'http://localhost:3100/post-exists/' + id,
+                url: 'https://getfedu.com/api/post-exists/' + id,
             }).done(function(res){
                 if(res){
                     $('#overlay').hide();
@@ -128,8 +133,13 @@ jQuery(document).ready(function($) {
                     $('#add_post').fadeIn();
                     that.queryApi(id, type);
                 }
-            }).fail(function(error){
-                console.log(error);
+            }).fail(function(jqXHR, textStatus){
+                console.log(jqXHR, textStatus);
+                if(jqXHR.status === 401){
+                    $('#overlay').remove();
+                    $('#add_post').remove();
+                    $('#msg').html('Sorry, your not logged in. Please log in first to fedu-backend...');
+                }
             });
         },
 
@@ -176,7 +186,7 @@ jQuery(document).ready(function($) {
                 name: 'autocomplete-tags',
                 valueKey: 'tagName',
                 prefetch: {
-                    url: 'http://localhost:3100/tag',
+                    url: 'https://getfedu.com/api/tag',
                     ttl: 0
                 },
                 template: [
